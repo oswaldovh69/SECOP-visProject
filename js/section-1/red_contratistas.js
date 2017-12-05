@@ -9,6 +9,9 @@ var margin = {
     right: 50,
 }
 
+var dotScale = [];
+var dotScaleValues = [];
+
 //Creation of a categorical color scale for the nodes according to their group membership (Requires d3 Chromatic library)
 var color = d3.scaleOrdinal(d3.schemeDark2);
 var colorGroup = ["entidad", "contratista"];
@@ -28,8 +31,8 @@ height = height - margin.top - margin.bottom;
 //Creation of the simulation parameters: Creation of the forces that will mandate the simulation
 var forceSimulation = d3.forceSimulation()
 						.force("collide", d3.forceCollide().radius(function(d) {return (d.group == "entidad") ? 15 : 3;})) //Prevents nodes from overlapping
-						.force("radial", d3.forceRadial(function(d) { return (d.group == "entidad") ? -40 : 280; }).y(height/2).x(width/2)) //Sends contratistas to the outside
-						.force("link", d3.forceLink().id(function(d) { return (d.id) }).strength(-0.001)) //Provides link forces to the nodes connected between them
+						.force("radial", d3.forceRadial(function(d) { return (d.group == "entidad") ? -50 : 300; }).y(height/2).x(width/2)) //Sends contratistas to the outside
+						.force("link", d3.forceLink().id(function(d) { return (d.id) }).strength(0.001)) //Provides link forces to the nodes connected between them
             .force("center", d3.forceCenter((width / 2), (height / 2)));
 
 //Read the JSON formatted data
@@ -58,6 +61,15 @@ d3.json("https://ayala-usma.github.io/SECOP-visProject/data/section-1/red_contra
   //Creation of the size scale for the nodes
   var nodeSize = d3.scaleLinear().domain(d3.extent(nodes.map(function(d) { return +d.cuantiaContratos; })))
   							 	 .range([2,40]);
+
+  //Establishing the scale of the nodes
+  var nodeSizesNumbers = nodeSize.domain();                
+  dotScale[0] = nodeSize(nodeSizesNumbers[1]);
+  dotScale[1] = nodeSize(nodeSizesNumbers[1]/2);
+  dotScale[2] = nodeSize(nodeSizesNumbers[1]/10);
+  dotScaleValues[0] = nodeSizesNumbers[1];
+  dotScaleValues[1] = nodeSizesNumbers[1]/2;
+  dotScaleValues[2] = nodeSizesNumbers[1]/10;
 
   //Adding the nodes to the canvas
   var drawingNodes = svgRedContratistas.selectAll(".node")
@@ -125,10 +137,10 @@ d3.json("https://ayala-usma.github.io/SECOP-visProject/data/section-1/red_contra
   //Function to define the node position within the boundaries of the SVG canvas
     function positionNode(d) {          
       	if (d.x < 0) {
-            d.x = 0 + 2
+            d.x = 0 + 4
         };
         if (d.y < 0) {
-            d.y = 0 + 2
+            d.y = 0 + 4
         };
         if (d.x > width) {
             d.x = width - 2
@@ -200,7 +212,29 @@ d3.json("https://ayala-usma.github.io/SECOP-visProject/data/section-1/red_contra
             drawingLinks.style("opacity", linkOpacity);
             drawingLinks.style("stroke", "#615");
         }
-      
+  
+  //Sphere scale
+  svgRedContratistas.selectAll(".scaleDot")
+                    .data(dotScale)
+                    .enter()
+                    .append("circle")
+                    .attr("class", "scaleDot")
+                    .attr("cx", margin.left + 80)
+                    .attr("cy", function(d){return height + d})
+                    .attr("r", function(d){return d})
+                    .attr("fill-opacity", 0)
+                    .attr("stroke", "#000");
+                    
+console.log(dotScaleValues)
+
+  svgRedContratistas.selectAll(".scaleDotText")
+                    .data(dotScaleValues)
+                    .enter()
+                    .append("text")
+                    .attr("class", "figure-legend")
+                    .attr("x", function(d,i){return margin.left + 130})
+                    .attr("y", function(d){return height + 4 + nodeSize(d)})
+                    .text(function(d) {return numberFormat(d)});
 });
 
 //Source caption
@@ -209,3 +243,5 @@ svgRedContratistas.append("text")
                   .attr("x", width - 4*margin.right)
                   .attr("y", height + (margin.bottom / 3))
                   .text("Fuente de los datos: SECOP I");
+
+
