@@ -383,6 +383,16 @@ CSS decorations specific to each section
     margin-top: 80px;
 }
 
+.figure-legend {
+    font-size: 10px;
+    font-family: sans-serif;
+    font-style: italic;
+}
+
+.nodeLabel {
+    font-size: 10px;
+    font-family: sans-serif;
+}
 /*
 Optimation for laptop with small screen
 */
