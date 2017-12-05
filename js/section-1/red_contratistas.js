@@ -3,17 +3,11 @@ var width = 1000,
     height = 800;
 
 var margin = {
-    top: 50,
-    bottom: 50,
+    top: 10,
+    bottom: 200,
     left: 50,
     right: 50,
 }
-
-var linkOpacity = 0.1;
-
-//Redefining the effective drawing area
-width = width - margin.left - margin.right;
-height = height - margin.top - margin.bottom;
 
 //Creation of a categorical color scale for the nodes according to their group membership (Requires d3 Chromatic library)
 var color = d3.scaleOrdinal(d3.schemeDark2);
@@ -27,10 +21,14 @@ var svgRedContratistas = d3.select(".red_contratistas")
 						               .attr("height", height)
 						               .append("g");
 
+//Redefining the effective drawing area
+width = width - margin.left - margin.right;
+height = height - margin.top - margin.bottom;
+
 //Creation of the simulation parameters: Creation of the forces that will mandate the simulation
 var forceSimulation = d3.forceSimulation()
 						.force("collide", d3.forceCollide().radius(function(d) {return (d.group == "entidad") ? 15 : 3;})) //Prevents nodes from overlapping
-						.force("radial", d3.forceRadial(function(d) { return (d.group == "entidad") ? -400 : 300; }).y(height/2).x(width/2)) //Sends contratistas to the outside
+						.force("radial", d3.forceRadial(function(d) { return (d.group == "entidad") ? -40 : 280; }).y(height/2).x(width/2)) //Sends contratistas to the outside
 						.force("link", d3.forceLink().id(function(d) { return (d.id) }).strength(0.001)) //Provides link forces to the nodes connected between them
             .force("center", d3.forceCenter((width / 2), (height / 2)));
 
@@ -42,6 +40,9 @@ d3.json("../../data/section-1/red_contratistas.json", function(error, data) {
   var nodes = data.nodes;
   var edges = data.links;
 
+  //Link opacity
+  var linkOpacity = 0.1;
+  
   //Creation of the links of the simulation
   var drawingLinks = svgRedContratistas.selectAll(".link")
                        .data(edges)
@@ -50,7 +51,6 @@ d3.json("../../data/section-1/red_contratistas.json", function(error, data) {
                        .attr("class", "line")
                        .attr("id", function (d, i) { return i; })
                        .attr("fill", "#615")
-                       .attr("stroke-width", 1)
                        .attr("opacity", linkOpacity)
                        .filter(function (d) {if(d.CuantiaContrato > 10000000000) {return this};});
 
@@ -58,8 +58,6 @@ d3.json("../../data/section-1/red_contratistas.json", function(error, data) {
   //Creation of the size scale for the nodes
   var nodeSize = d3.scaleLinear().domain(d3.extent(nodes.map(function(d) { return +d.cuantiaContratos; })))
   							 	 .range([2,40])
-
-  console.log(nodeSize);
 
   //Adding the nodes to the canvas
   var drawingNodes = svgRedContratistas.selectAll(".node")
@@ -127,16 +125,16 @@ d3.json("../../data/section-1/red_contratistas.json", function(error, data) {
   //Function to define the node position within the boundaries of the SVG canvas
     function positionNode(d) {          
       	if (d.x < 0) {
-            d.x = 0
+            d.x = 0 + 2
         };
         if (d.y < 0) {
-            d.y = 0
+            d.y = 0 + 2
         };
         if (d.x > width) {
-            d.x = width
+            d.x = width - 2
         };
         if (d.y > height) {
-            d.y = height
+            d.y = height - 2
         };
    
         return "translate(" + d.x + "," + d.y + ")";
@@ -201,10 +199,13 @@ d3.json("../../data/section-1/red_contratistas.json", function(error, data) {
             drawingNodes.selectAll("text.nodeLabel").remove();
             drawingLinks.style("opacity", linkOpacity);
             drawingLinks.style("stroke", "#615");
-            drawingLinks.style("stroke-width", 1);
         }
       
-
-
 });
 
+//Source caption
+svgRedContratistas.append("text")
+                  .attr("class","figure-legend")
+                  .attr("x", width - 4*margin.right)
+                  .attr("y", height + (margin.bottom / 3))
+                  .text("Fuente de los datos: SECOP I");
