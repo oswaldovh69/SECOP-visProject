@@ -33,7 +33,7 @@ var forceSimulation = d3.forceSimulation()
             .force("center", d3.forceCenter((width / 2), (height / 2)));
 
 //Read the JSON formatted data
-d3.json("../../data/section-1/red_contratistas.json", function(error, data) {
+d3.json("https://ayala-usma.github.io/SECOP-visProject/data/section-1/red_contratistas.json", function(error, data) {
   if (error) throw error;
 
   //Variables containing nodes and edges
@@ -57,7 +57,7 @@ d3.json("../../data/section-1/red_contratistas.json", function(error, data) {
 
   //Creation of the size scale for the nodes
   var nodeSize = d3.scaleLinear().domain(d3.extent(nodes.map(function(d) { return +d.cuantiaContratos; })))
-  							 	 .range([2,40])
+  							 	 .range([2,40]);
 
   //Adding the nodes to the canvas
   var drawingNodes = svgRedContratistas.selectAll(".node")
